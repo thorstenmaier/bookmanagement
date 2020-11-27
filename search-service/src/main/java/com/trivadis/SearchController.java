@@ -17,8 +17,7 @@ public class SearchController {
     private TreeSet<Book> allBooks = new TreeSet<>();
 
     public SearchController() {
-        allBooks.add(new Book("Microservices: Grundlagen flexibler Softwarearchitekturen", "Eberhard Wolff"));
-        allBooks.add(new Book("Building Microservices", "Sam Newman"));
+        Arrays.stream(new RestTemplate().getForObject("http://localhost:8082/book", Book[].class)).forEach(allBooks::add);
     }
 
     @GetMapping("/search")
