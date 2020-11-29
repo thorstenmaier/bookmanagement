@@ -1,9 +1,10 @@
 package com.trivadis;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -18,5 +19,10 @@ public class BookController {
     @GetMapping("/book")
     public List<BookDTO> getAllBooks() {
         return bookRepository.findAll().stream().map(BookDTO::new).collect(Collectors.toList());
+    }
+
+    @PostMapping("/book")
+    public ResponseEntity<Book> createBook(@RequestBody Book book) {
+        return ResponseEntity.ok(bookRepository.save(book));
     }
 }
