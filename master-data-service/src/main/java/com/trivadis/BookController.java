@@ -1,6 +1,8 @@
 package com.trivadis;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.jms.annotation.JmsListener;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,9 +13,11 @@ import java.util.stream.Collectors;
 public class BookController {
 
     private BookRepository bookRepository;
+    private JmsTemplate jmsTemplate;
 
-    public BookController(BookRepository bookRepository) {
+    public BookController(BookRepository bookRepository, JmsTemplate jmsTemplate) {
         this.bookRepository = bookRepository;
+        this.jmsTemplate = jmsTemplate;
     }
 
     @GetMapping("/book")
@@ -23,6 +27,8 @@ public class BookController {
 
     @PostMapping("/book")
     public ResponseEntity<Book> createBook(@RequestBody Book book) {
-        return ResponseEntity.ok(bookRepository.save(book));
+        ResponseEntity<Book> entity = ResponseEntity.ok(bookRepository.save(book));
+        jmsTemplate.convertAndSend("newBookTopic", new AddedBookEvent(book.getName(), book.getAuthor().getName()));
+        return entity;
     }
 }
