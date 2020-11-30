@@ -1,5 +1,7 @@
 package com.trivadis;
 
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,8 +19,10 @@ public class SearchController {
 
     private TreeSet<Book> allBooks = new TreeSet<>();
 
-    public SearchController() {
-        Arrays.stream(new RestTemplate().getForObject("http://localhost:8082/book", Book[].class)).forEach(allBooks::add);
+    public SearchController(DiscoveryClient discoveryClient) {
+        List<ServiceInstance> instances = discoveryClient.getInstances("master-data-service");
+        String uri = instances.stream().findFirst().get().getUri().toString();
+        Arrays.stream(new RestTemplate().getForObject(uri + "/book", Book[].class)).forEach(allBooks::add);
     }
 
     @GetMapping("/search")
